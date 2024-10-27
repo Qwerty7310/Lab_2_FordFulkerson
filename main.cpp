@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "FordFulkerson.h"
 #include "Graph.h"
 #include "cxxopts.hpp"
 
@@ -63,7 +64,21 @@ int main(int argc, char *argv[]) {
 }
 
 void run(ifstream &input, ofstream &output) {
-    auto [n, list] = readGraph(input);
+    //    auto [n, list] = readGraph(input);
+
+    vector<Node *> adjacencyList;
+    addEdge(adjacencyList, 1, 2, 20);
+    addEdge(adjacencyList, 1, 3, 30);
+    addEdge(adjacencyList, 1, 4, 10);
+
+    addEdge(adjacencyList, 2, 3, 40);
+    addEdge(adjacencyList, 2, 5, 30);
+
+    addEdge(adjacencyList, 3, 4, 10);
+    addEdge(adjacencyList, 3, 5, 20);
+
+    addEdge(adjacencyList, 4, 5, 20);
 
 
+    FordFulkerson(adjacencyList, adjacencyList.size(), 0, adjacencyList.size() - 1);
 }

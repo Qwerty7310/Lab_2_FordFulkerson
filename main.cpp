@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <chrono>
 
 #include "FordFulkerson.h"
 #include "Graph.h"
@@ -64,21 +65,28 @@ int main(int argc, char *argv[]) {
 }
 
 void run(ifstream &input, ofstream &output) {
-    //    auto [n, list] = readGraph(input);
+    auto [n, list] = readGraph(input);
+    //    int n = 5;
+    //    vector<Node *> adjacencyList(n, nullptr);
+    //    addEdge(adjacencyList, 0, 1, 20);
+    //    addEdge(adjacencyList, 0, 2, 30);
+    //    addEdge(adjacencyList, 0, 3, 10);
+    //
+    //    addEdge(adjacencyList, 1, 2, 40);
+    //    addEdge(adjacencyList, 1, 4, 30);
+    //
+    //    addEdge(adjacencyList, 2, 3, 10);
+    //    addEdge(adjacencyList, 2, 4, 20);
+    //
+    //    addEdge(adjacencyList, 3, 4, 20);
 
-    vector<Node *> adjacencyList;
-    addEdge(adjacencyList, 1, 2, 20);
-    addEdge(adjacencyList, 1, 3, 30);
-    addEdge(adjacencyList, 1, 4, 10);
+    // Начало замера времени
+    auto start_time = chrono::high_resolution_clock::now();
 
-    addEdge(adjacencyList, 2, 3, 40);
-    addEdge(adjacencyList, 2, 5, 30);
+    FordFulkerson(list, n, 376, 309);
 
-    addEdge(adjacencyList, 3, 4, 10);
-    addEdge(adjacencyList, 3, 5, 20);
-
-    addEdge(adjacencyList, 4, 5, 20);
-
-
-    FordFulkerson(adjacencyList, adjacencyList.size(), 0, adjacencyList.size() - 1);
+    // Конец замера времени
+    auto end_time = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsed = end_time - start_time;
+    cout << "Time: " << elapsed.count() << " seconds\n";
 }

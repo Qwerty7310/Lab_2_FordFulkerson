@@ -1,6 +1,6 @@
+#include <chrono>
 #include <fstream>
 #include <iostream>
-#include <chrono>
 
 #include "FordFulkerson.h"
 #include "Graph.h"
@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void run(ifstream &input_file, ofstream &output_file);
+void run(ifstream &input_file, ofstream &output_file, int test_number);
 
 int main(int argc, char *argv[]) {
     try {
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        run(input, output);
+        run(input, output, (int)input_file[input_file.size() - 4] - '0');
 
     } catch (const std::exception &e) {
         cerr << "Ошибка при разборе аргументов: " << e.what() << endl;
@@ -64,26 +64,48 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void run(ifstream &input, ofstream &output) {
+void run(ifstream &input, ofstream &output, int test_number) {
+    cout << "test: " << test_number << endl;
     auto [n, list] = readGraph(input);
-    //    int n = 5;
-    //    vector<Node *> adjacencyList(n, nullptr);
-    //    addEdge(adjacencyList, 0, 1, 20);
-    //    addEdge(adjacencyList, 0, 2, 30);
-    //    addEdge(adjacencyList, 0, 3, 10);
-    //
-    //    addEdge(adjacencyList, 1, 2, 40);
-    //    addEdge(adjacencyList, 1, 4, 30);
-    //
-    //    addEdge(adjacencyList, 2, 3, 10);
-    //    addEdge(adjacencyList, 2, 4, 20);
-    //
-    //    addEdge(adjacencyList, 3, 4, 20);
+
+    /* ------ Пример графа с 5 вершинами ------ */
+    /*
+        int n = 5;
+        vector<Node *> adjacencyList(n, nullptr);
+        addEdge(adjacencyList, 0, 1, 20);
+        addEdge(adjacencyList, 0, 2, 30);
+        addEdge(adjacencyList, 0, 3, 10);
+
+        addEdge(adjacencyList, 1, 2, 40);
+        addEdge(adjacencyList, 1, 4, 30);
+
+        addEdge(adjacencyList, 2, 3, 10);
+        addEdge(adjacencyList, 2, 4, 20);
+
+        addEdge(adjacencyList, 3, 4, 20);
+     */
+
+    // clang-format off
+    int16_t vertices[6][2] = {
+        {376, 309},
+        {168, 267},
+        {340, 995},
+        {477, 231},
+        {637, 471},
+        {93, 604}
+    };
+    // clang-format on
 
     // Начало замера времени
     auto start_time = chrono::high_resolution_clock::now();
 
-    FordFulkerson(list, n, 376, 309);
+    /* ------ Поиск потока через вершины из ответов ------ */
+    //    int max_flow = FordFulkerson(list, n, vertices[test_number - 1][0], vertices[test_number - 1][1]);
+    //    cout << "Max flow: " << max_flow << endl;
+    /* --------------------------------------------------- */
+
+    int max_flow = FordFulkerson(list, n, 0, 1);
+    cout << "Max flow: " << max_flow << endl;
 
     // Конец замера времени
     auto end_time = chrono::high_resolution_clock::now();

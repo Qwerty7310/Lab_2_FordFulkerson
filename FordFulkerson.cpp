@@ -1,5 +1,8 @@
 #include "FordFulkerson.h"
 
+#include <algorithm>
+#include <cstdint>
+#include <iostream>
 #include <queue>
 #include <vector>
 
@@ -7,88 +10,71 @@
 
 using namespace std;
 
-int FordFulkerson(std::vector<Node *> &list, int16_t n, int16_t s, int16_t t) {
-    vector<pair<int16_t, int16_t>> vertices(n, {-1, -1});  // пара {путь; предыдущая вершина}
-    vertices[s] = {INT16_MAX, -1};
+int16_t bfs(vector<Node *> &list, int16_t s, int16_t t, vector<int16_t> &parent) {
+    // Инициализируем вектор parent (хранит родительские вершины для восстановления пути)
+    fill(parent.begin(), parent.end(), -1);  // -1 - еще не посещенные вершины
+    parent[s] = -2;                          // Для исходной вершины
 
-    vector<Node *> edges = list;  // Копия вектора для изменения текущих потоков
+    // Инициализируем очередь для хранения вершин, которые нужно посетить
+    queue<pair<int16_t, int16_t>> q;
+    q.emplace(s, INT16_MAX);
 
-    priority_queue<pair<int, int>>
-        pq;  // Очередь приоритетов для выбора ребра с самым большим текущим потоком
+    while (!q.empty()) {
+        auto [cur, flow] = q.front();
+        q.pop();
 
-    int i = s;
-    int max_flow = 0;
-    while (true) {
-        Node *temp = edges[i];
+        for (Node *edge = list[cur]; edge; edge = edge->next) {
+            if (parent[edge->vertex] == -1 && edge->weight > 0) {
+                parent[edge->vertex] = cur;
+                int16_t new_flow = min(flow, edge->weight);
 
-        pq = priority_queue<pair<int, int>>();
-        while (temp) {
-            if (temp->weight > 0 && vertices[temp->vertex].first == -1 &&
-                vertices[temp->vertex].second != INT16_MAX)
-                pq.emplace(temp->weight, temp->vertex);
-            temp = temp->next;
-        }
+                if (edge->vertex == t) return new_flow;
 
-        if (pq.empty()) {
-            if (i == s)
-                break;
-            else {
-                vertices[i].first = INT16_MAX;
-                i = vertices[i].second;
-                continue;
+                q.emplace(edge->vertex, new_flow);
             }
-        } else {
-            auto [weight, next_vertex] = pq.top();
-            vertices[next_vertex] = {weight, i};
-            if (next_vertex == t) {
-                // Находим минимальный поток
-                int16_t min = INT16_MAX;
-                auto p = vertices[t];
-                while (p.first != INT16_MAX) {
-                    if (p.first < min) min = p.first;
-                    p = vertices[p.second];
-                }
-
-                // Пересчитываем поток
-                int16_t u = vertices[t].second;
-                int16_t v = t;
-                while (true) {
-                    // Для ребра (u, v)
-                    Node *ptr = edges[u];
-                    while (ptr) {
-                        if (ptr->vertex == v) ptr->weight -= min;
-                        ptr = ptr->next;
-                    }
-
-                    // Для ребра (v, u)
-                    ptr = edges[v];
-                    bool flag_found = false;  // Такого ребра может не быть
-                    while (ptr) {
-                        if (ptr->vertex == u) {
-                            ptr->weight += min;
-                            flag_found = true;
-                        }
-                        ptr = ptr->next;
-                    }
-                    // Если такого ребра нет
-                    if (!flag_found) addEdge(edges, v, u, min);
-
-                    if (u == s) break;
-
-                    v = u;
-                    u = vertices[u].second;
-                }
-                // Очищаем метки
-                vertices = vector<pair<int16_t, int16_t>>(n, {-1, -1});
-                vertices[s] = {INT16_MAX, -1};
-                max_flow += min;
-                i = s;  // Переходим на новую итерацию
-                continue;
-            } else
-                i = next_vertex;
         }
     }
-    cout << "flow: " << max_flow << endl;
 
     return 0;
+}
+
+int FordFulkerson(vector<Node *> &list, int16_t n, int16_t s, int16_t t) {
+    int max_flow = 0;           // Максимальный поток от s к t
+    vector<int16_t> parent(n);  // Вектор родительский вершин
+
+    int16_t new_flow;  // Поток в текущем пути
+    while ((new_flow = bfs(list, s, t, parent))) {
+        max_flow += new_flow;
+
+        // Обновление остаточной сети
+        int cur = t;
+        while (cur != s) {
+            int prev = parent[cur];
+
+            // Обновление веса прямого ребра (prev, cur)
+            for (Node *edge = list[prev]; edge; edge = edge->next) {
+                if (edge->vertex == cur) {
+                    edge->weight -= new_flow;
+                    break;
+                }
+            }
+
+            // Обновление веса обратного ребра (cur, prev)
+            bool flag_found = false;
+            for (Node *edge = list[cur]; edge; edge = edge->next) {
+                if (edge->vertex == prev) {
+                    edge->weight += new_flow;
+                    flag_found = true;
+                    break;
+                }
+            }
+
+            // Если не нашли обратного ребра
+            if (!flag_found) addEdge(list, cur, prev, new_flow);
+
+            cur = prev;  // Переход к следующей вершине
+        }
+    }
+
+    return max_flow;
 }

@@ -66,7 +66,14 @@ int main(int argc, char *argv[]) {
 
 void run(ifstream &input, ofstream &output, int test_number) {
     cout << "test: " << test_number << endl;
+
     auto [n, list] = readGraph(input);
+
+    // Перемещаем курсор в начало файла
+    input.clear();
+    input.seekg(0, std::ios::beg);
+
+    auto [n_copy, list_copy] = readGraph(input);
 
     /* ------ Пример графа с 5 вершинами ------ */
     /*
@@ -99,16 +106,14 @@ void run(ifstream &input, ofstream &output, int test_number) {
     // Начало замера времени
     auto start_time = chrono::high_resolution_clock::now();
 
-    /* ------ Поиск потока через вершины из ответов ------ */
-    //    int max_flow = FordFulkerson(list, n, vertices[test_number - 1][0], vertices[test_number - 1][1]);
-    //    cout << "Max flow: " << max_flow << endl;
-    /* --------------------------------------------------- */
-
-    int max_flow = FordFulkerson(list, n, 0, 1);
-    cout << "Max flow: " << max_flow << endl;
+    int max_flow = FordFulkerson(list, n, vertices[test_number - 1][0], vertices[test_number - 1][1]);
+    output << "Max flow (" << vertices[test_number - 1][0] << " -> " << vertices[test_number - 1][1]
+           << "): " << max_flow << endl;
 
     // Конец замера времени
     auto end_time = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed = end_time - start_time;
     cout << "Time: " << elapsed.count() << " seconds\n";
+
+    verticesFlow(list, list_copy, output);
 }

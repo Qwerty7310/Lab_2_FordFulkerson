@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <fstream>
 #include <iostream>
 #include <queue>
 #include <vector>
@@ -77,4 +78,40 @@ int FordFulkerson(vector<Node *> &list, int16_t n, int16_t s, int16_t t) {
     }
 
     return max_flow;
+}
+
+int verticesFlow(vector<Node *> &original_list, vector<Node *> &list, ofstream &output) {
+    if (list.size() != original_list.size()) {
+        cerr << "Ошибка: размеры графов не совпадают." << endl;
+        return -1;
+    }
+
+    int size = list.size();
+
+    // Перебираем все вершины
+    for (int u = 0; u < size; u++) {
+        Node *original_edge = original_list[u];
+
+        // Проходим по всем исходным рёбрам для данной вершины
+        while (original_edge) {
+            // Ищем соответствующее ребро в остаточной сети
+            Node *residual_edge = list[u];
+            while (residual_edge && residual_edge->vertex != original_edge->vertex)
+                residual_edge = residual_edge->next;
+
+            // Если ребро найдено, рассчитываем поток как разность
+            if (residual_edge) {
+                int flow = original_edge->weight - residual_edge->weight;
+                if (flow > 0)
+                    output << "(" << u << ", " << original_edge->vertex << ", " << flow << ")" << endl;
+
+            } else
+                // Если остаточного ребра нет, значит оно было полностью использовано
+                output << "(" << original_edge->vertex << ", " << u << ", " << original_edge->weight << ")"
+                       << endl;
+
+            original_edge = original_edge->next;
+        }
+    }
+    return 0;
 }
